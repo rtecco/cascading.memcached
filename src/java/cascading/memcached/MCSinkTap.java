@@ -43,32 +43,17 @@ public class MCSinkTap extends SinkTap
   {
   String hostnames = null;
   boolean useBinaryProtocol = true;
-  int shutdownTimeoutSec = 5;
-  int flushThreshold = 1000;
-
+	
   public MCSinkTap( String hostnames, MCBaseScheme scheme )
-    {
-    super( scheme );
-    this.hostnames = hostnames;
-    }
-
+	{
+		this(hostnames, scheme, true);
+	}
+	
   public MCSinkTap( String hostnames, MCBaseScheme scheme, boolean useBinaryProtocol )
-    {
-    this( hostnames, scheme, useBinaryProtocol, 1 );
-    }
-
-  public MCSinkTap( String hostnames, MCBaseScheme scheme, boolean useBinaryProtocol, int shutdownTimeoutSec )
-    {
-    this( hostnames, scheme, useBinaryProtocol, shutdownTimeoutSec, 1000 );
-    }
-
-  public MCSinkTap( String hostnames, MCBaseScheme scheme, boolean useBinaryProtocol, int shutdownTimeoutSec, int flushThreshold )
     {
     super( scheme );
     this.hostnames = hostnames;
     this.useBinaryProtocol = useBinaryProtocol;
-    this.shutdownTimeoutSec = shutdownTimeoutSec;
-    this.flushThreshold = flushThreshold;
     }
 
   public Path getPath()
@@ -84,7 +69,7 @@ public class MCSinkTap extends SinkTap
 
   public TupleEntryCollector openForWrite( JobConf conf ) throws IOException
     {
-    return new MCOutputCollector( hostnames, useBinaryProtocol, shutdownTimeoutSec );
+    return new MCOutputCollector( hostnames, useBinaryProtocol );
     }
 
   @Override

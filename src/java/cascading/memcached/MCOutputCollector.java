@@ -32,6 +32,8 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.ConnectionFactoryBuilder;
+import net.spy.memcached.FailureMode;
+import net.spy.memcached.HashAlgorithm;
 import net.spy.memcached.MemcachedClient;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.slf4j.Logger;
@@ -45,35 +47,17 @@ public class MCOutputCollector<V> extends TupleEntryCollector implements OutputC
   private static final Logger LOG = LoggerFactory.getLogger( MCOutputCollector.class );
 
   private MemcachedClient client;
-  private int shutdownTimeoutSec = 5;
-  private int flushThreshold = 1000;
+  private int shutdownTimeoutSec = 10;
+  private int flushThreshold = 50;
 
   private LinkedList<Future> futures = new LinkedList<Future>();
-
-  MCOutputCollector( String hostnames ) throws IOException
-    {
-    this( hostnames, true );
-    }
-
+	
   MCOutputCollector( String hostnames, boolean useBinary ) throws IOException
     {
-    this( hostnames, useBinary, 1 );
-    }
-
-  MCOutputCollector( String hostnames, boolean useBinary, int shutdownTimeoutSec ) throws IOException
-    {
-    this( hostnames, useBinary, shutdownTimeoutSec, 1000 );
-    }
-
-  MCOutputCollector( String hostnames, boolean useBinary, int shutdownTimeoutSec, int flushThreshold ) throws IOException
-    {
-    this.shutdownTimeoutSec = shutdownTimeoutSec;
-    this.flushThreshold = flushThreshold;
     ConnectionFactoryBuilder builder = new ConnectionFactoryBuilder();
-
     ConnectionFactoryBuilder.Protocol protocol = useBinary ? ConnectionFactoryBuilder.Protocol.BINARY : ConnectionFactoryBuilder.Protocol.TEXT;
 
-    builder = builder.setProtocol( protocol ).setOpQueueMaxBlockTime( 1000 );
+    builder = builder.setProtocol( protocol ).setHashAlg( HashAlgorithm.FNV1_64_HASH ).setFailureMode( FailureMode.Retry );
 
     client = new MemcachedClient( builder.build(), AddrUtil.getAddresses( hostnames ) );
     }
