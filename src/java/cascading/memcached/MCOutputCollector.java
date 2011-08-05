@@ -49,11 +49,14 @@ public class MCOutputCollector<V> extends TupleEntryCollector implements OutputC
   private MemcachedClient client;
   private int shutdownTimeoutSec = 10;
   private int flushThreshold = 50;
+  private int expireIn = 0;
 
   private LinkedList<Future> futures = new LinkedList<Future>();
 	
-  MCOutputCollector( String hostnames, boolean useBinary ) throws IOException
+  MCOutputCollector( String hostnames, boolean useBinary, int expireIn ) throws IOException
     {
+	this.expireIn = expireIn;
+	
     ConnectionFactoryBuilder builder = new ConnectionFactoryBuilder();
     ConnectionFactoryBuilder.Protocol protocol = useBinary ? ConnectionFactoryBuilder.Protocol.BINARY : ConnectionFactoryBuilder.Protocol.TEXT;
 
@@ -83,7 +86,7 @@ public class MCOutputCollector<V> extends TupleEntryCollector implements OutputC
 
     try
       {
-      return client.set( key, 0, value );
+      return client.set( key, expireIn, value );
       }
     catch( IllegalStateException exception )
       {
